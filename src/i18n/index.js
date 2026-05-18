@@ -1,15 +1,17 @@
-import { createI18n } from "vue-i18n";
-import zhCN from "./locales/zh-CN.js";
-import en from "./locales/en.js";
+import { createI18n } from 'vue-i18n'
+import zhCN from './lang/zh-CN'
+import enUS from './lang/en-US'
+
+const messages = {
+  'zh-CN': zhCN,
+  'en-US': enUS
+}
 
 const i18n = createI18n({
   legacy: false,
-  locale: "zh-CN",
-  fallbackLocale: "en",
-  messages: {
-    "zh-CN": zhCN,
-    en,
-  },
-});
+  locale: 'zh-CN',
+  fallbackLocale: 'en-US',
+  messages
+})
 
-export default i18n;
+export default i18n
