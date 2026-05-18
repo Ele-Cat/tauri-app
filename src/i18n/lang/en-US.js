@@ -24,5 +24,15 @@ export default {
     title: 'Settings',
     general: 'General Settings',
     language: 'Language',
+  },
+  update: {
+    check: 'Check for Updates',
+    checking: 'Checking...',
+    available: 'Update Available',
+    noUpdate: 'You are up to date',
+    currentVersion: 'Current Version',
+    latestVersion: 'Latest Version',
+    download: 'Download Update',
+    releaseNotes: 'Release Notes'
   }
 }

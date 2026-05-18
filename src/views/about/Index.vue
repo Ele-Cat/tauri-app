@@ -16,6 +16,40 @@
         </div>
       </div>
 
+      <div class="update-section">
+        <el-button
+          v-if="!updateStatus"
+          type="primary"
+          link
+          :loading="checking"
+          @click="handleCheckUpdate"
+        >
+          {{ checking ? $t('update.checking') : $t('update.check') }}
+        </el-button>
+
+        <div v-else-if="updateStatus.available" class="update-available">
+          <el-alert type="success" :closable="false">
+            <template #title>
+              <span>{{ $t('update.available') }}</span>
+              <span class="update-versions">
+                v{{ version }} → v{{ updateStatus.latestVersion }}
+              </span>
+            </template>
+            <template #default>
+              <div class="update-actions">
+                <el-button type="primary" size="small" @click="openRelease">
+                  {{ $t('update.download') }}
+                </el-button>
+              </div>
+            </template>
+          </el-alert>
+        </div>
+
+        <span v-else-if="updateStatus.available === false" class="no-update">
+          {{ $t('update.noUpdate') }}
+        </span>
+      </div>
+
       <div class="divider">
         <span class="divider-line" />
         <span class="divider-icon">⚙</span>
@@ -30,8 +64,38 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
+import { ElMessage } from 'element-plus'
+import { checkForUpdates } from '@/api/updateCheck'
+
 defineOptions({ name: 'About' })
 import { version } from '../../../package.json'
+
+const checking = ref(false)
+const updateStatus = ref(null)
+
+async function handleCheckUpdate() {
+  checking.value = true
+  try {
+    const result = await checkForUpdates(version)
+    updateStatus.value = result
+    if (!result.available && !result.error) {
+      ElMessage.success($t('update.noUpdate'))
+    } else if (result.error) {
+      ElMessage.error(result.error)
+    }
+  } catch (error) {
+    ElMessage.error('Update check failed')
+  } finally {
+    checking.value = false
+  }
+}
+
+function openRelease() {
+  if (updateStatus.value?.releaseUrl) {
+    window.open(updateStatus.value.releaseUrl, '_blank')
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -143,6 +207,34 @@ import { version } from '../../../package.json'
         50% { opacity: 0.4; }
       }
     }
+  }
+
+  .update-section {
+    margin-bottom: 16px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .update-available {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .update-versions {
+    margin-left: 8px;
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
+  }
+
+  .update-actions {
+    margin-top: 8px;
+  }
+
+  .no-update {
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
   }
 
   .divider {
