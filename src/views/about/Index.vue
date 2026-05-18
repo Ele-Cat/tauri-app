@@ -64,11 +64,11 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'About' })
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { checkForUpdates } from '@/api/updateCheck'
-
-defineOptions({ name: 'About' })
+import { openUrl } from '@tauri-apps/plugin-opener'
 import { version } from '../../../package.json'
 
 const checking = ref(false)
@@ -93,7 +93,7 @@ async function handleCheckUpdate() {
 
 function openRelease() {
   if (updateStatus.value?.releaseUrl) {
-    window.open(updateStatus.value.releaseUrl, '_blank')
+    openUrl(updateStatus.value.releaseUrl)
   }
 }
 </script>

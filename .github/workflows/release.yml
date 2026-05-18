@@ -16,6 +16,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set version from tag
+        run: |
+          $version = "${{ github.ref_name }}" -replace '^v', ''
+          echo "VERSION=$version" >> $env:GITHUB_ENV
+
+      - name: Update version in package.json
+        run: |
+          $version = "${{ env.VERSION }}"
+          $package = Get-Content package.json | ConvertFrom-Json
+          $package.version = $version
+          $package | ConvertTo-Json -Depth 10 | Set-Content package.json
+
+      - name: Update version in tauri.conf.json
+        run: |
+          $version = "${{ env.VERSION }}"
+          $tauri = Get-Content src-tauri/tauri.conf.json | ConvertFrom-Json
+          $tauri.bundle.version = $version
+          $tauri | ConvertTo-Json -Depth 10 | Set-Content src-tauri/tauri.conf.json
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
