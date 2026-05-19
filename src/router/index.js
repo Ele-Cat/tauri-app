@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import BlankLayout from '@/layouts/BlankLayout/Index.vue'
 import DefaultLayout from '@/layouts/DefaultLayout/Index.vue'
+import { Home, Settings, Info } from 'lucide-vue-next'
 
 const routes = [
   {
@@ -12,19 +13,19 @@ const routes = [
         path: '/home',
         name: 'Home',
         component: () => import('../views/home/Index.vue'),
-        meta: { title: 'nav.home' }
+        meta: { title: 'nav.home', icon: Home, keepAlive: true }
       },
       {
         path: '/settings',
         name: 'Settings',
         component: () => import('../views/settings/Index.vue'),
-        meta: { title: 'nav.settings' }
+        meta: { title: 'nav.settings', icon: Settings, keepAlive: true }
       },
       {
         path: '/about',
         name: 'About',
         component: () => import('../views/about/Index.vue'),
-        meta: { title: 'nav.about' }
+        meta: { title: 'nav.about', icon: Info, keepAlive: true }
       },
     ]
   },

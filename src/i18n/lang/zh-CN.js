@@ -20,19 +20,23 @@ export default {
   about: {
     copyright: '©2026 Tauri App'
   },
+  common: {
+    cancel: '取消'
+  },
   settings: {
     title: '设置',
     general: '通用设置',
     language: '语言',
-  },
-  update: {
-    check: '检查更新',
-    checking: '检查中...',
-    available: '发现新版本',
-    noUpdate: '已是最新版本',
-    currentVersion: '当前版本',
-    latestVersion: '最新版本',
-    download: '下载更新',
-    releaseNotes: '更新内容'
+    update: {
+      title: '软件更新',
+      dialogTitle: '发现新版本',
+      current: '当前版本',
+      latest: '最新版本',
+      check: '检查更新',
+      download: '下载并安装',
+      downloading: '下载中，请勿关闭窗口',
+      noUpdate: '已是最新版本',
+      releaseNotes: '发布说明',
+    }
   }
 }

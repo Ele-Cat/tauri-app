@@ -16,40 +16,6 @@
         </div>
       </div>
 
-      <div class="update-section">
-        <el-button
-          v-if="!updateStatus"
-          type="primary"
-          link
-          :loading="checking"
-          @click="handleCheckUpdate"
-        >
-          {{ checking ? $t('update.checking') : $t('update.check') }}
-        </el-button>
-
-        <div v-else-if="updateStatus.available" class="update-available">
-          <el-alert type="success" :closable="false">
-            <template #title>
-              <span>{{ $t('update.available') }}</span>
-              <span class="update-versions">
-                v{{ version }} → v{{ updateStatus.latestVersion }}
-              </span>
-            </template>
-            <template #default>
-              <div class="update-actions">
-                <el-button type="primary" size="small" @click="openRelease">
-                  {{ $t('update.download') }}
-                </el-button>
-              </div>
-            </template>
-          </el-alert>
-        </div>
-
-        <span v-else-if="updateStatus.available === false" class="no-update">
-          {{ $t('update.noUpdate') }}
-        </span>
-      </div>
-
       <div class="divider">
         <span class="divider-line" />
         <span class="divider-icon">⚙</span>
@@ -65,37 +31,7 @@
 
 <script setup>
 defineOptions({ name: 'About' })
-import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
-import { checkForUpdates } from '@/api/updateCheck'
-import { openUrl } from '@tauri-apps/plugin-opener'
 import { version } from '../../../package.json'
-
-const checking = ref(false)
-const updateStatus = ref(null)
-
-async function handleCheckUpdate() {
-  checking.value = true
-  try {
-    const result = await checkForUpdates(version)
-    updateStatus.value = result
-    if (!result.available && !result.error) {
-      ElMessage.success($t('update.noUpdate'))
-    } else if (result.error) {
-      ElMessage.error(result.error)
-    }
-  } catch (error) {
-    ElMessage.error('Update check failed')
-  } finally {
-    checking.value = false
-  }
-}
-
-function openRelease() {
-  if (updateStatus.value?.releaseUrl) {
-    openUrl(updateStatus.value.releaseUrl)
-  }
-}
 </script>
 
 <style lang="scss" scoped>
@@ -105,7 +41,7 @@ function openRelease() {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  min-height: calc(100vh - var(--header-height) - var(--footer-height));
+  min-height: calc(100vh - var(--header-height));
   background: radial-gradient(ellipse at 50% 0%, var(--bg-color-secondary) 0%, var(--bg-color) 60%);
 
   .about-container {
@@ -209,34 +145,6 @@ function openRelease() {
     }
   }
 
-  .update-section {
-    margin-bottom: 16px;
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .update-available {
-    width: 100%;
-    max-width: 300px;
-  }
-
-  .update-versions {
-    margin-left: 8px;
-    font-size: 12px;
-    color: var(--el-text-color-secondary);
-  }
-
-  .update-actions {
-    margin-top: 8px;
-  }
-
-  .no-update {
-    font-size: 12px;
-    color: var(--el-text-color-secondary);
-  }
-
   .divider {
     display: flex;
     align-items: center;
@@ -252,53 +160,6 @@ function openRelease() {
     .divider-icon {
       font-size: 14px;
       opacity: 0.4;
-    }
-  }
-
-  .capabilities {
-    margin-bottom: 16px;
-
-    .cap-title {
-      font-size: 11px;
-      color: var(--text-color-secondary);
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      margin-bottom: 14px;
-    }
-
-    .cap-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-
-      .cap-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 16px;
-        background: var(--bg-color-tertiary);
-        border: 1px solid var(--border-color);
-        border-radius: 10px;
-        text-align: left;
-        transition: all 0.2s;
-
-        &:hover {
-          background: var(--hover-bg);
-          border-color: var(--primary-color);
-          transform: translateY(-1px);
-        }
-
-        .cap-icon {
-          flex-shrink: 0;
-          color: var(--text-color);
-        }
-
-        .cap-info {
-          font-size: 13px;
-          font-weight: 600;
-          color: var(--text-color);
-        }
-      }
     }
   }
 

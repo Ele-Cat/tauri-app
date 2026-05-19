@@ -12,6 +12,13 @@
     "fs:allow-write-text-file",
     "fs:allow-write-file",
     "fs:write-all",
+    {
+      "identifier": "http:default",
+      "allow": [
+        { "url": "https://github.com/**" },
+        { "url": "https://api.github.com/**" }
+      ]
+    },
     "core:window:default",
     "core:window:allow-show",
     "core:window:allow-hide",

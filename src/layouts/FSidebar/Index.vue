@@ -24,7 +24,7 @@
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAppStore } from '@/stores/modules/app'
-import { FileVideo, Settings, Info, ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 
 const appStore = useAppStore()
 
@@ -33,11 +33,13 @@ const route = useRoute()
 
 const currentRoute = computed(() => route.path)
 
-const navItems = [
-  { path: '/home', label: 'nav.home', icon: FileVideo },
-  { path: '/settings', label: 'nav.settings', icon: Settings },
-  { path: '/about', label: 'nav.about', icon: Info },
-]
+const navItems = computed(() => {
+  return router.options.routes.flatMap(route => route.children || []).filter(child => !child.meta?.hidden).map(child => ({
+    path: child.path,
+    label: child.meta?.title || '',
+    icon: child.meta?.icon || null,
+  }))
+})
 
 function isActive(path) {
   return currentRoute.value === path || currentRoute.value.startsWith(path + '/')

@@ -20,19 +20,23 @@ export default {
   about: {
     copyright: '©2026 Tauri App'
   },
+  common: {
+    cancel: 'Cancel'
+  },
   settings: {
     title: 'Settings',
     general: 'General Settings',
     language: 'Language',
-  },
-  update: {
-    check: 'Check for Updates',
-    checking: 'Checking...',
-    available: 'Update Available',
-    noUpdate: 'You are up to date',
-    currentVersion: 'Current Version',
-    latestVersion: 'Latest Version',
-    download: 'Download Update',
-    releaseNotes: 'Release Notes'
+    update: {
+      title: 'Software Update',
+      dialogTitle: 'New Version Available',
+      current: 'Current Version',
+      latest: 'Latest Version',
+      check: 'Check for Updates',
+      download: 'Download and Install',
+      downloading: 'Downloading, please do not close the window',
+      noUpdate: 'You are up to date',
+      releaseNotes: 'Release Notes',
+    }
   }
 }
