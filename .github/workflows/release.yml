@@ -9,9 +9,8 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  build-windows:
     runs-on: windows-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -38,7 +37,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -59,15 +58,134 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Package as zip
+      - name: Package Windows exe
         run: |
-          Compress-Archive -Path "src-tauri/target/release/tauri-app.exe" -DestinationPath "tauri-app-${{ env.VERSION }}-x64.zip"
+          Compress-Archive -Path "src-tauri/target/release/tauri-app.exe" -DestinationPath "tauri-app-${{ env.VERSION }}-windows-x64.zip"
 
-      - name: Upload Release Asset
+      - name: Upload Windows Release Assets
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            tauri-app-${{ env.VERSION }}-x64.zip
+            src-tauri/target/release/bundle/nsis/*.exe
+            src-tauri/target/release/bundle/msi/*.msi
+            tauri-app-${{ env.VERSION }}-windows-x64.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set version from tag
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
+
+      - name: Update version in package.json
+        run: |
+          version="${{ env.VERSION }}"
+          node -e "const pkg=require('./package.json'); pkg.version='$version'; require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2))"
+
+      - name: Update version in tauri.conf.json
+        run: |
+          version="${{ env.VERSION }}"
+          node -e "const tauri=require('./src-tauri/tauri.conf.json'); tauri.version='$version'; require('fs').writeFileSync('src-tauri/tauri.conf.json', JSON.stringify(tauri, null, 2))"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Setup Rust
+        run: |
+          rustup default stable
+          rustup target add x86_64-unknown-linux-gnu
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Build Tauri app
+        run: npm run tauri build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Package Linux exe
+        run: |
+          tar -czvf tauri-app-${{ env.VERSION }}-linux-x64.tar.gz -C src-tauri/target/release/ tauri-app
+
+      - name: Upload Linux Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            src-tauri/target/release/bundle/deb/*.deb
+            src-tauri/target/release/bundle/appimage/*.AppImage
+            tauri-app-${{ env.VERSION }}-linux-x64.tar.gz
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set version from tag
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
+
+      - name: Update version in package.json
+        run: |
+          version="${{ env.VERSION }}"
+          node -e "const pkg=require('./package.json'); pkg.version='$version'; require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2))"
+
+      - name: Update version in tauri.conf.json
+        run: |
+          version="${{ env.VERSION }}"
+          node -e "const tauri=require('./src-tauri/tauri.conf.json'); tauri.version='$version'; require('fs').writeFileSync('src-tauri/tauri.conf.json', JSON.stringify(tauri, null, 2))"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Setup Rust
+        run: |
+          rustup default stable
+          rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Build Tauri app
+        run: npm run tauri build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Package macOS exe
+        run: |
+          tar -czvf tauri-app-${{ env.VERSION }}-macos-arm64.tar.gz -C src-tauri/target/release/bundle/app/app.app/Contents/MacOS/ tauri-app
+          tar -czvf tauri-app-${{ env.VERSION }}-macos-x64.tar.gz -C src-tauri/target/release/bundle/app/app.app/Contents/MacOS/ tauri-app
+
+      - name: Upload macOS Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            src-tauri/target/release/bundle/dmg/*.dmg
+            tauri-app-${{ env.VERSION }}-macos-arm64.tar.gz
+            tauri-app-${{ env.VERSION }}-macos-x64.tar.gz
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

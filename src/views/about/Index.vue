@@ -3,7 +3,7 @@
     <div class="about-container">
       <div class="logo-area">
         <div class="logo-ring">
-          <img class="logo-img" src="@/assets/images/logo.png" alt="AI Auto Cut" />
+          <img class="logo-img" src="@/assets/images/logo.png" alt="Tauri App" />
         </div>
         <div class="logo-glow" />
       </div>
