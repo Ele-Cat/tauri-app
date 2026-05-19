@@ -5,8 +5,9 @@ import { invoke } from '@tauri-apps/api/core'
 import { fetch } from '@tauri-apps/plugin-http'
 import { ElMessage } from 'element-plus'
 import request from '@/utils/request'
+import { GITHUB_CONFIG } from '@/config'
 
-const GITHUB_API = 'https://api.github.com/repos/Ele-Cat/tauri-app'
+const GITHUB_API = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}`
 const GITHUB_RELEASES_API = `${GITHUB_API}/releases/latest`
 const GITHUB_TAGS_API = `${GITHUB_API}/git/refs/tags`
 
@@ -117,11 +118,11 @@ function getDownloadFileName(version, platform) {
   const { os, arch } = platform
 
   if (os === 'windows') {
-    return `tauri-app_${version}_x64-setup.exe`
+    return `${GITHUB_CONFIG.repo}_${version}_x64-setup.exe`
   } else if (os === 'macos') {
-    return `tauri-app_${version}_${arch}.dmg`
+    return `${GITHUB_CONFIG.repo}_${version}_${arch}.dmg`
   } else if (os === 'linux') {
-    return `tauri-app_${version}_amd64.deb`
+    return `${GITHUB_CONFIG.repo}_${version}_amd64.deb`
   }
   return null
 }
@@ -129,7 +130,7 @@ function getDownloadFileName(version, platform) {
 function getDownloadUrl(version, platform) {
   const fileName = getDownloadFileName(version, platform)
   if (!fileName) return null
-  return `https://github.com/Ele-Cat/tauri-app/releases/download/v${version}/${fileName}`
+  return `https://github.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/releases/download/v${version}/${fileName}`
 }
 
 export async function downloadAndInstall(version, releaseUrl, onProgressChange) {
