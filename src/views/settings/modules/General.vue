@@ -138,6 +138,7 @@ async function startDownload() {
 
       if (progress.percent === 100) {
         downloading.value = false
+        showUpdateDialog.value = false
       }
     })
   } finally {
