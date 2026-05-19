@@ -101,6 +101,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
       - name: Setup Rust
         run: |
           rustup default stable
@@ -176,8 +181,12 @@ jobs:
 
       - name: Package macOS exe
         run: |
-          tar -czvf tauri-app-${{ env.VERSION }}-macos-arm64.tar.gz -C src-tauri/target/release/bundle/app/app.app/Contents/MacOS/ tauri-app
-          tar -czvf tauri-app-${{ env.VERSION }}-macos-x64.tar.gz -C src-tauri/target/release/bundle/app/app.app/Contents/MacOS/ tauri-app
+          cp -r src-tauri/target/release/bundle/app/*.app tauri-app-${{ env.VERSION }}-macos-arm64.app
+          tar -czvf tauri-app-${{ env.VERSION }}-macos-arm64.tar.gz tauri-app-${{ env.VERSION }}-macos-arm64.app
+          rm -rf tauri-app-${{ env.VERSION }}-macos-arm64.app
+          cp -r src-tauri/target/release/bundle/app/*.app tauri-app-${{ env.VERSION }}-macos-x64.app
+          tar -czvf tauri-app-${{ env.VERSION }}-macos-x64.tar.gz tauri-app-${{ env.VERSION }}-macos-x64.app
+          rm -rf tauri-app-${{ env.VERSION }}-macos-x64.app
 
       - name: Upload macOS Release Assets
         uses: softprops/action-gh-release@v2
