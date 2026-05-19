@@ -181,12 +181,15 @@ jobs:
 
       - name: Package macOS exe
         run: |
-          cp -r src-tauri/target/release/bundle/app/*.app tauri-app-${{ env.VERSION }}-macos-arm64.app
-          tar -czvf tauri-app-${{ env.VERSION }}-macos-arm64.tar.gz tauri-app-${{ env.VERSION }}-macos-arm64.app
-          rm -rf tauri-app-${{ env.VERSION }}-macos-arm64.app
-          cp -r src-tauri/target/release/bundle/app/*.app tauri-app-${{ env.VERSION }}-macos-x64.app
-          tar -czvf tauri-app-${{ env.VERSION }}-macos-x64.tar.gz tauri-app-${{ env.VERSION }}-macos-x64.app
-          rm -rf tauri-app-${{ env.VERSION }}-macos-x64.app
+          APP_PATH=$(find src-tauri/target/release/bundle -name "*.app" -type d | head -1)
+          if [ -n "$APP_PATH" ]; then
+            cp -r "$APP_PATH" "tauri-app-${{ env.VERSION }}-macos-arm64.app"
+            tar -czvf tauri-app-${{ env.VERSION }}-macos-arm64.tar.gz "tauri-app-${{ env.VERSION }}-macos-arm64.app"
+            rm -rf "tauri-app-${{ env.VERSION }}-macos-arm64.app"
+          else
+            echo "No .app bundle found"
+            exit 1
+          fi
 
       - name: Upload macOS Release Assets
         uses: softprops/action-gh-release@v2
@@ -194,7 +197,6 @@ jobs:
           files: |
             src-tauri/target/release/bundle/dmg/*.dmg
             tauri-app-${{ env.VERSION }}-macos-arm64.tar.gz
-            tauri-app-${{ env.VERSION }}-macos-x64.tar.gz
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
