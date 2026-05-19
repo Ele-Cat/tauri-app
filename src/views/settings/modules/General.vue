@@ -72,7 +72,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, getCurrentInstance } from 'vue'
 import { ElMessage } from 'element-plus'
 import { RefreshCw, Download } from 'lucide-vue-next'
 import { useAppStore } from '@/stores/modules/app'
@@ -80,6 +80,8 @@ import { checkForUpdates, downloadAndInstall } from '@/api/update'
 import { version } from '@/../package.json'
 
 const appStore = useAppStore()
+const { proxy } = getCurrentInstance()
+const $t = proxy.$t
 const currentVersion = version
 const latestVersion = ref('')
 const checking = ref(false)

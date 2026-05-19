@@ -153,7 +153,7 @@ export async function downloadAndInstall(version, releaseUrl, onProgressChange) 
 
   if (!savePath) return
 
-  onProgressChange(0)
+  onProgressChange({ percent: 0, loaded: 0, total: 0 })
   ElMessage.info('开始下载...')
 
   try {
@@ -189,7 +189,7 @@ export async function downloadAndInstall(version, releaseUrl, onProgressChange) 
 
     await writeFile(savePath, uint8Array)
 
-    onProgressChange(100)
+    onProgressChange({ percent: 100, loaded, total })
     ElMessage.success('下载完成，正在打开安装程序...')
 
     await invoke('open_file', { path: savePath })
