@@ -29,3 +29,5 @@ appStore.initTheme()
 app.config.globalProperties.$t = i18n.global.t
 
 app.mount("#app");
+
+document.addEventListener('contextmenu', (e) => e.preventDefault())
