@@ -17,6 +17,9 @@ export default {
     restore: 'Restore',
     close: 'Close'
   },
+  home: {
+    title: 'Home',
+  },
   about: {
     copyright: '©2026 Tauri App'
   },
@@ -29,14 +32,15 @@ export default {
     language: 'Language',
     update: {
       title: 'Software Update',
-      dialogTitle: 'New Version Available',
+      hasNewVersion: 'New Version Available',
       current: 'Current Version',
       latest: 'Latest Version',
       check: 'Check for Updates',
       download: 'Download and Install',
       downloading: 'Downloading, please do not close the window',
-      noUpdate: 'You are up to date',
+      noUpdate: 'It is already the latest version',
       releaseNotes: 'Release Notes',
+      notFound: 'No releases or tags found'
     }
   }
 }

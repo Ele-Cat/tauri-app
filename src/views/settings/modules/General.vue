@@ -11,20 +11,21 @@
         <el-form-item :label="$t('settings.update.title')">
           <el-button
             :loading="checking"
-            :disabled="checking"
             :icon="RefreshCw"
             @click="checkUpdates"
             type="primary"
+            style="margin-right: 8px;"
           >
             {{ $t('settings.update.check') }}
           </el-button>
+          <span v-if="latestVersion">{{ $t('settings.update.hasNewVersion') }}：{{ latestVersion }}</span>
         </el-form-item>
       </el-form>
     </el-card>
 
     <el-dialog
       v-model="showUpdateDialog"
-      :title="$t('settings.update.dialogTitle')"
+      :title="$t('settings.update.hasNewVersion')"
       width="480px"
       :close-on-click-modal="false"
       :show-close="!downloading"
@@ -58,7 +59,12 @@
         </div>
       </div>
       <template #footer>
-        <div v-if="!downloading">
+        <div v-if="downloading">
+          <el-button @click="handleCancelDownload">
+            {{ $t('common.cancel') }}
+          </el-button>
+        </div>
+        <div v-else>
           <el-button @click="showUpdateDialog = false">
             {{ $t('common.cancel') }}
           </el-button>
@@ -72,11 +78,11 @@
 </template>
 
 <script setup>
-import { ref, getCurrentInstance } from 'vue'
+import { ref, onMounted, getCurrentInstance } from 'vue'
 import { ElMessage } from 'element-plus'
 import { RefreshCw, Download } from 'lucide-vue-next'
 import { useAppStore } from '@/stores/modules/app'
-import { checkForUpdates, downloadAndInstall } from '@/api/update'
+import { checkForUpdates, downloadAndInstall, cancelDownload } from '@/api/update'
 import { version } from '@/../package.json'
 
 const appStore = useAppStore()
@@ -101,26 +107,34 @@ function formatBytes(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
 
-async function checkUpdates() {
-  checking.value = true
+function handleCancelDownload() {
+  cancelDownload()
+  downloading.value = false
+  downloadProgress.value = 0
+  downloadLoaded.value = 0
+  downloadTotal.value = 0
+}
+
+async function checkUpdates(flag = true) {
+  flag && (checking.value = true)
 
   try {
     const result = await checkForUpdates(currentVersion)
 
     if (result.error) {
-      ElMessage.error(result.error)
+      flag && ElMessage.error($t(result.error))
     } else if (result.available) {
       latestVersion.value = result.latestVersion
       releaseUrl.value = result.releaseUrl
       releaseNotes.value = result.releaseNotes || ''
-      showUpdateDialog.value = true
+      flag && (showUpdateDialog.value = true)
     } else {
-      ElMessage.success($t('settings.update.noUpdate'))
+      flag && ElMessage.success($t('settings.update.noUpdate'))
     }
   } catch (error) {
-    ElMessage.error('检查更新失败: ' + error.message)
+    flag && ElMessage.error('检查更新失败: ' + error.message)
   } finally {
-    checking.value = false
+    flag && (checking.value = false)
   }
 }
 
@@ -148,6 +162,10 @@ async function startDownload() {
     downloadTotal.value = 0
   }
 }
+
+onMounted(() => {
+  checkUpdates(false)
+})
 </script>
 
 <style lang="scss" scoped>

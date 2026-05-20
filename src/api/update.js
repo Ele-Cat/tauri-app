@@ -31,7 +31,7 @@ export async function checkForUpdates(currentVersion) {
     let releaseNotes = null
 
     try {
-      const data = await request.get(GITHUB_RELEASES_API)
+      const data = await request.get(GITHUB_RELEASES_API, { timeout: 5 * 1000 })
       latestVersion = data.tag_name?.replace(/^v/, '') || data.name
       releaseUrl = data.html_url
       releaseNotes = data.body || ''
@@ -46,7 +46,7 @@ export async function checkForUpdates(currentVersion) {
     if (!latestVersion) {
       return {
         available: false,
-        error: 'No releases or tags found'
+        error: 'settings.update.notFound'
       }
     }
 
@@ -75,7 +75,7 @@ export async function checkForUpdates(currentVersion) {
 
 async function fetchLatestTag() {
   try {
-    const data = await request.get(GITHUB_TAGS_API)
+    const data = await request.get(GITHUB_TAGS_API, { timeout: 5 * 1000 })
     if (!data || data.length === 0) return null
 
     const sortedTags = data
@@ -133,6 +133,8 @@ function getDownloadUrl(version, platform) {
   return `https://github.com/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/releases/download/v${version}/${fileName}`
 }
 
+let downloadAbort = null
+
 export async function downloadAndInstall(version, releaseUrl, onProgressChange) {
   const platform = getPlatformInfo()
   const downloadUrl = getDownloadUrl(version, platform)
@@ -154,11 +156,14 @@ export async function downloadAndInstall(version, releaseUrl, onProgressChange) 
 
   if (!savePath) return
 
-  onProgressChange({ percent: 0, loaded: 0, total: 0 })
+  const controller = new AbortController()
+  downloadAbort = () => controller.abort()
+
+  onProgressChange({ percent: 0, loaded: 0, total: 0, cancel: downloadAbort })
   ElMessage.info('开始下载...')
 
   try {
-    const response = await fetch(downloadUrl)
+    const response = await fetch(downloadUrl, { signal: controller.signal })
 
     if (!response.ok) {
       throw new Error(`下载失败: ${response.status}`)
@@ -180,7 +185,7 @@ export async function downloadAndInstall(version, releaseUrl, onProgressChange) 
       loaded += value.length
       if (total > 0) {
         const percent = Math.round((loaded / total) * 100)
-        onProgressChange({ percent, loaded, total })
+        onProgressChange({ percent, loaded, total, cancel: downloadAbort })
       }
     }
 
@@ -190,13 +195,22 @@ export async function downloadAndInstall(version, releaseUrl, onProgressChange) 
 
     await writeFile(savePath, uint8Array)
 
-    onProgressChange({ percent: 100, loaded, total })
+    onProgressChange({ percent: 100, loaded, total, cancel: null })
     ElMessage.success('下载完成，正在打开安装程序...')
 
     await invoke('open_file', { path: savePath })
 
+    downloadAbort = null
+
   } catch (error) {
     console.error('Download error:', error)
+    downloadAbort = null
+
+    if (error.name === 'AbortError') {
+      ElMessage.warning('下载已取消')
+      return
+    }
+
     ElMessage({
       message: '应用内下载失败，将跳转到浏览器下载',
       type: 'warning',
@@ -205,5 +219,12 @@ export async function downloadAndInstall(version, releaseUrl, onProgressChange) 
       grouping: true,
     })
     openUrl(releaseUrl)
+  }
+}
+
+export function cancelDownload() {
+  if (downloadAbort) {
+    downloadAbort()
+    downloadAbort = null
   }
 }

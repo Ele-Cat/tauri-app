@@ -17,6 +17,9 @@ export default {
     restore: '恢复窗口',
     close: '关闭窗口'
   },
+  home: {
+    title: '首页',
+  },
   about: {
     copyright: '©2026 Tauri App'
   },
@@ -29,7 +32,7 @@ export default {
     language: '语言',
     update: {
       title: '软件更新',
-      dialogTitle: '发现新版本',
+      hasNewVersion: '发现新版本',
       current: '当前版本',
       latest: '最新版本',
       check: '检查更新',
@@ -37,6 +40,7 @@ export default {
       downloading: '下载中，请勿关闭窗口',
       noUpdate: '已是最新版本',
       releaseNotes: '发布说明',
+      notFound: '未发现新版本'
     }
   }
 }
